@@ -46,11 +46,12 @@ std::map<Hashes, std::vector<file>> parseChecksum() {
     return parsedFiles;
 }
 
-int main() {
-    auto smth = parseChecksum();
-    for (auto files : smth[Hashes::MD5]) {
-        std::cout << files.filename << '\t' << files.expected_hash << std::endl;
-    }
-    // std::cout << smth[Hashes::CRC32].front().filename << '\t' << smth[Hashes::CRC32].front().expected_hash << std::endl;
-    return 0;
-}
+// Testing
+// int main() {
+//     auto smth = parseChecksum();
+//     for (auto files : smth[Hashes::MD5]) {
+//         std::cout << files.filename << '\t' << files.expected_hash << std::endl;
+//     }
+//     // std::cout << smth[Hashes::CRC32].front().filename << '\t' << smth[Hashes::CRC32].front().expected_hash << std::endl;
+//     return 0;
+// }
