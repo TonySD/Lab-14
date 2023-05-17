@@ -363,7 +363,7 @@ Hashes parseAlgorithm(std::string something) {
     if (std::string("SHA256") == something || std::string("sha256") == something) {
         return Hashes::SHA256;
     }
-    throw std::exception("Unknown algorithm");
+    throw std::invalid_argument("Unknown algorithm");
 };
 
 // Hash Factory
@@ -384,7 +384,7 @@ class HashFactory {
                     return hash_function(data, length);
                 }
                 default: {
-                    throw std::exception("Invalid hash-function");
+                    throw std::invalid_argument("Invalid hash-function");
                 }
             }
         }
