@@ -17,12 +17,12 @@ std::map<Hashes, std::vector<file>> parseArguments(int argc, const char** argume
     file example;
     example.expected_hash = "";
     size_t pointer = 0;
-    while (strcmp(arguments[++pointer], "a")) {
+    while (strcmp(arguments[++pointer], "-a") != 0) {
         if (pointer >= argc) throw std::invalid_argument("You must specify hash-function! Check usage");
     }
-    algorithm = parseAlgorithm(arguments[pointer]);
+    algorithm = parseAlgorithm(arguments[pointer + 1]);
     for (pointer = 1; pointer < argc; ++pointer) {
-        if (strcmp(arguments[pointer], "-a")) {
+        if (strcmp(arguments[pointer], "-a") == 0) {
             algorithm = parseAlgorithm(arguments[++pointer]);
             continue;
         }

@@ -12,7 +12,6 @@
 #include <iomanip>
 #include <map>
 #include <exception>
-#include <mutex>
 
 class CRC32 {
     const unsigned int CRC32TABLE[256];
@@ -360,10 +359,9 @@ const char* algorithmToText(Hashes algorithm) {
     case Hashes::CRC32: return "CRC32";
     case Hashes::MD5: return "MD5";
     case Hashes::SHA256: return "SHA256";
-    default: break;
+    default: return "";
     }
-    return "";
-}
+};
 
 Hashes parseAlgorithm(std::string something) {
     if (std::string("CRC32") == something || std::string("crc32") == something) {
@@ -375,16 +373,14 @@ Hashes parseAlgorithm(std::string something) {
     if (std::string("SHA256") == something || std::string("sha256") == something) {
         return Hashes::SHA256;
     }
+    std::cout << something << "|||" << std::endl;
     throw std::invalid_argument("Unknown algorithm");
 };
-
-std::mutex Factory;
 
 // Hash Factory
 class HashFactory {
     public:
         static std::string hash(const unsigned char* data, size_t length, Hashes variation) {
-            Factory.lock();
             switch (variation) {
                 case Hashes::CRC32: {
                     CRC32 hash_function;
@@ -402,7 +398,6 @@ class HashFactory {
                     throw std::invalid_argument("Invalid hash-function");
                 }
             }
-            Factory.unlock();
         }
 };
 
