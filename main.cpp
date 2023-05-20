@@ -14,47 +14,53 @@ std::mutex output;
 void comparingHashes(std::map<Hashes, std::vector<file>> files) {
     std::vector<Hashes> all_hashes { Hashes::MD5, Hashes::CRC32, Hashes::SHA256 };
     std::vector<std::future<std::string>> futures;
-    std::future<std::string> smth;
+    std::vector<unsigned char> string;
     std::string got_string;
     
     for (Hashes algorithm : all_hashes) {
         for (file current : files[algorithm]) {
-            smth = std::async(HashFactory::hash, (unsigned char*) current.filename.data(), current.filename.size(), algorithm);
-            futures.push_back(smth);
+            string = getBytesFromFile(current.filename);
+            futures.push_back(std::async(HashFactory::hash, string.data(), string.size(), algorithm));
         }
     }
     for (Hashes algorithm : all_hashes) {
+        if (files[algorithm].empty()) continue;
+        std::cout << std::endl << algorithmToText(algorithm) << std::endl << std::endl;
         for (file current : files[algorithm]) {
-            futures.back().wait();
-            got_string = futures.back().get();
-            if (!current.expected_hash.compare(got_string)) {
-                output.lock();
-                std::cout << "File " << current.filename << " is corrupted!" << std::endl << "Checked by " << algorithmToText(algorithm) << std::endl;
+            futures.front().wait();
+            got_string = futures.front().get();
+
+            if (current.expected_hash.compare(std::string("")) == 0) {
+                std::cout << current.filename << " hash: " << got_string << std::endl;
+                continue;
+            }
+
+            output.lock();
+            std::cout << "File " << current.filename;
+            if (current.expected_hash.compare(got_string)) {      
+                std::cout << " is corrupted!" << std::endl;
                 std::cout << "Expected hash: " << current.expected_hash << std::endl;
                 std::cout << "Got hash: " << got_string << std::endl;
-                output.unlock();
+            } else {
+                std::cout << " is complete!" << std::endl;
             }
-            futures.pop_back();
 
+            std::cout << std::endl;
+            output.unlock();
+            futures.erase(futures.begin());
         }
     }
 }
 
 int main(int argc, const char** argv) {
-    // if (std::filesystem::exists("Checksum.ini")) {
-    // std::cout << parseChecksum("Checksum.ini")[Hashes::CRC32].front().filename << std::endl;
-    comparingHashes(parseChecksum("Checksum.ini"));
-    // // } else if (argc == 1) {
-    //     std::cout << "Usage: " << argv[0] << " filenames (-a crc32/md5/sha256)" << std::endl;
-    //     return 1;
-    // }
-    // std::vector<Hashes> all_hashes { Hashes::MD5, Hashes::CRC32, Hashes::SHA256 };
-    // auto files = parseArguments(argc, argv);
-    // for (Hashes algorithm : all_hashes) {
-    //     for (file current : files[algorithm]) {
-    //         std::cout << algorithmToText(algorithm) << '\t' << current.filename << std::endl;
-    //     }
-    // }
+    if (std::filesystem::exists("Checksum.ini")) {
+        comparingHashes(parseChecksum("Checksum.ini"));
+    }
+
+    if (argc < 4 && !std::filesystem::exists("Checksum.ini")) std::cout << "Usage: " << argv[0] << " filenames -a (crc32/md5/sha256)" << std::endl;
+    else if (argc >= 4) {
+        comparingHashes(parseArguments(argc, argv));
+    }
 
     return 0;
 }

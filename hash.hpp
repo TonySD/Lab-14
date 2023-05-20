@@ -73,7 +73,9 @@ class CRC32 {
         }
 
         std::string hash(const unsigned char *value, size_t length) {
-            return std::to_string((*this)(value, length));
+            std::stringstream ss;
+            ss << std::hex << (*this)(value, length);
+            return ss.str();
         }
 };
 
@@ -373,7 +375,6 @@ Hashes parseAlgorithm(std::string something) {
     if (std::string("SHA256") == something || std::string("sha256") == something) {
         return Hashes::SHA256;
     }
-    std::cout << something << "|||" << std::endl;
     throw std::invalid_argument("Unknown algorithm");
 };
 

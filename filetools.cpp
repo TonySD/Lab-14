@@ -65,6 +65,12 @@ std::map<Hashes, std::vector<file>> parseChecksum(std::string checksumFilename) 
         current_file.filename = filename;
         for (auto& character : current) { character = std::tolower(character); }
         current_file.expected_hash = current.substr(hash_start + 1, current.size() - hash_start);
+
+        // Erasing some error char
+        if (*(--current_file.expected_hash.end()) == (char) 13) {
+            current_file.expected_hash.erase(--current_file.expected_hash.end());
+        }
+
         parsedFiles[algorithm].push_back(current_file);
     }
     return parsedFiles;
@@ -83,24 +89,3 @@ std::vector<unsigned char> getBytesFromFile(std::string filename) {
 
     return bytes;
 }
-
-// Testing
-// int main() {
-//     auto smth = parseChecksum("Checksum.ini");
-//     for (auto files : smth[Hashes::CRC32]) {
-//         std::cout << files.filename << '\t' << files.expected_hash << std::endl;
-//     }
-//     // std::cout << smth[Hashes::CRC32].front().filename << '\t' << smth[Hashes::CRC32].front().expected_hash << std::endl;
-//     return 0;
-// }
-
-// int main() {
-//     auto smth = getBytesFromFile("README.md");
-//     // for (auto i : smth) {
-//     //     std::cout << std::hex << (int) i;
-//     // }
-//     std::cout << HashFactory::hash(smth.data(), smth.size(), Hashes::CRC32) << std::endl;
-//     std::cout << HashFactory::hash(smth.data(), smth.size(), Hashes::MD5) << std::endl;
-//     std::cout << HashFactory::hash(smth.data(), smth.size(), Hashes::SHA256) << std::endl;
-//     return 0;
-// }
