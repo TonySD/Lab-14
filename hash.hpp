@@ -231,6 +231,9 @@ class SHA256 {
             update(data, length);
             return toString(digest()); // toString?
         }
+        std::string hash(const unsigned char* data, size_t length) {
+            return (*this)(data, length);
+        }
 
     private:
         unsigned char m_data[64];
@@ -393,7 +396,7 @@ class HashFactory {
                 }
                 case Hashes::SHA256: {
                     SHA256 hash_function;
-                    return hash_function(data, length);
+                    return hash_function.hash(data, length);
                 }
                 default: {
                     throw std::invalid_argument("Invalid hash-function");
